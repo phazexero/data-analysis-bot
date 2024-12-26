@@ -27,22 +27,28 @@ SQL_KEYWORDS = [
     "case", "when", "then", "else", "end", "default", "check", "unique", "cascade"
 ]
 
+def shorten_column_name(name, max_length=63):
+    """
+    Shorten the column name by truncating the middle part and replacing it with 'xxx'
+    if the length exceeds the max_length.
 
-def shorten_with_transformers(sentence, max_length=63):
+    Parameters:
+        name (str): The original column name.
+        max_length (int): The maximum allowed length of the name.
+
+    Returns:
+        str: The shortened column name.
     """
-    Shortens a sentence to the specified maximum length using a Hugging Face summarization model.
-    """
-    try:
-        # Load a pre-trained summarization pipeline
-        summarizer = pipeline("summarization", model="facebook/bart-base")
-        
-        # Summarize the input text
-        summary = summarizer(sentence, max_length=max_length // 2, min_length=5, do_sample=False)[0]['summary_text']
-        # Truncate if necessary
-        return summary[:max_length].strip()
-    except Exception as e:
-        print(f"Error: {e}. Returning truncated original sentence.")
-        return sentence[:max_length].strip()
+    if len(name) <= max_length:
+        return name
+
+    # Calculate the length of the prefix and suffix to retain
+    prefix_length = (max_length - 3) // 2
+    suffix_length = max_length - 3 - prefix_length
+
+    # Form the new shortened name
+    shortened_name = name[:prefix_length] + 'xxx' + name[-suffix_length:]
+    return shortened_name
 
 def connect_to_db(db_name, user, password, host, port):
     """Establish a connection to the PostgreSQL database."""
@@ -72,9 +78,8 @@ def format_column_name(name):
     name = re.sub(r'\d+', lambda x: num2words(x.group(), lang='en'), name).replace('-', '_')
     
     if len(name)>63:
-        name = shorten_with_transformers(name)
+        name = shorten_column_name(name)
     
-    print(name)
     name = name.strip().lower().replace(" ", "_")
     # Check if the name contains SQL keywords and replace them
     if name in SQL_KEYWORDS:

@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#For streamlit application
+.streamlit
+
 # C extensions
 *.so
 

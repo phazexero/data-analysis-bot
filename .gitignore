@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+#For streamlit application
+.streamlit
+secrets.toml
+
 # C extensions
 *.so
 
